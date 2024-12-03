@@ -165,3 +165,18 @@ app.use((err, req, res, next) => {
         }
     });
 });
+
+app.get('/api/status', (req, res) => {
+    const publicData = latestStatuses.map(status => ({
+        name: status.name,
+        status: status.status,
+        responseTime: status.responseTime,
+        lastChecked: status.lastChecked,
+        message: status.message
+    }));
+
+    res.json({
+        timestamp: new Date().toISOString(),
+        services: publicData
+    });
+});

@@ -24,6 +24,7 @@ Simple service monitoring with a status page, configurable and extensible protoc
 ## Features 🚀
 - Extensible monitoring protocols & notifications
 - Status page
+- REST API for status data
 
 ## Configuration 🛠
 
@@ -47,6 +48,26 @@ config.json structure:
             "checkInterval": 60,
             "url": "https://example.com",
             "notifications": []
+        }
+    ]
+}
+```
+
+## API 📡
+
+### GET /api/status
+Returns current status of all services.
+
+```json
+{
+    "timestamp": "2024-03-12T12:34:56.789Z",
+    "services": [
+        {
+            "name": "Service Name",
+            "status": "up",
+            "responseTime": 123,
+            "lastChecked": "2024-03-12T12:34:56.789Z",
+            "message": "Status message"
         }
     ]
 }
