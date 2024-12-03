@@ -4,10 +4,25 @@ Simple service monitoring with a status page, configurable and extensible protoc
 
 ![Screenshot](.github/assets/screenshot.png)
 
+## Table of Contents 📑
+- [Features](#features-)
+- [Configuration](#configuration-)
+- [Protocols](#protocols-)
+  - [HTTP](#http-)
+  - [HTTP-JSON](#http-json-)
+  - [Minecraft](#minecraft-)
+- [Notifiers](#notifiers-)
+  - [Discord Webhook](#discord-webhook-)
+  - [Discord](#discord-)
+  - [Telegram](#telegram-)
+  - [Webhook](#webhook-)
+- [Extending](#extending-)
+  - [Custom Protocols](#custom-protocols)
+  - [Custom Notifiers](#custom-notifiers)
+
 ## Features 🚀
-- Premade & extensible monitoring protocols
-- Premade & extensible notifications
-- Per-service and global notifications
+- Extensible monitoring protocols & notifications
+- Status page
 
 ## Configuration 🛠
 
@@ -131,4 +146,20 @@ config.json structure:
     "url": "<webhook-url>"
 }
 ```
+
+## Extending 🔧
+
+### Custom Protocols
+Create new files in the `protocols/` directory. See existing protocols for reference.
+
+Each protocol must export:
+- `name`: Protocol identifier used in config
+- `check(watcher)`: Async function returning status object
+
+### Custom Notifiers
+Create new files in the `notifiers/` directory. See existing notifiers for reference.
+
+Each notifier must export:
+- `name`: Notifier identifier used in config
+- `notify(changes, config)`: Async function to send notifications
 
