@@ -39,7 +39,7 @@ config.json structure:
 ## Protocols 📡
 
 ### HTTP 🌐
-```
+```json
 {
     "name": "Example HTTP watcher",
     "protocol": "http",
