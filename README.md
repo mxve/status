@@ -11,6 +11,7 @@ Simple service monitoring with a status page, configurable and extensible protoc
   - [HTTP](#http-)
   - [HTTP-JSON](#http-json-)
   - [Minecraft](#minecraft-)
+  - [Call of Duty](#call-of-duty-)
 - [Notifiers](#notifiers-)
   - [Discord Webhook](#discord-webhook-)
   - [Discord](#discord-)
@@ -54,6 +55,8 @@ config.json structure:
 ## Protocols 📡
 
 ### HTTP 🌐
+
+Checks if the response status code is in the allowed list.
 ```json
 {
     "name": "Example HTTP watcher",
@@ -68,6 +71,7 @@ config.json structure:
 
 ### HTTP-JSON 📄
 
+Checks if the response is valid JSON and if the specified JSON path exists.
 ```json
 {
     "name": "Example JSON API watcher",
@@ -85,6 +89,7 @@ config.json structure:
 }
 ```
 
+Checks if the JSON path exists and is an array with at least one element.
 ```json
 "jsonPath": "data.statuses",
 "condition": {
@@ -95,6 +100,7 @@ config.json structure:
 
 ### Minecraft 🎮
 
+Minecraft Java Edition, verifies server handshake.
 ```json
 {
     "name": "Example Minecraft watcher",
@@ -107,10 +113,27 @@ config.json structure:
 }
 ```
 
+### Call of Duty 🎮
+
+DPMaster compatible Call of Duty servers (IW4x, CoD4 etc). Sends `getInfo` packet and waits for `infoResponse`.
+
+```json
+{
+    "name": "Example CoD Server",
+    "protocol": "cod",
+    "checkInterval": 60,
+    "host": "example.com",
+    "port": 28960,
+    "timeout": 5000,
+    "notifications": []
+}
+```
+
 ## Notifiers 📤
 
 ### Discord Webhook 📨
 
+Sends a message to a Discord webhook.
 ```json
 {
     "type": "discord-webhook",
@@ -120,6 +143,7 @@ config.json structure:
 
 ### Discord 📨
 
+Sends a message to a Discord channel.
 ```json
 {
     "type": "discord",
@@ -130,6 +154,7 @@ config.json structure:
 
 ### Telegram 📨
 
+Sends a message to a Telegram chat.
 ```json
 {
     "type": "telegram",
@@ -140,6 +165,7 @@ config.json structure:
 
 ### Webhook 📨
 
+Sends a message to a webhook.
 ```json
 {
     "type": "webhook",
@@ -162,4 +188,3 @@ Create new files in the `notifiers/` directory. See existing notifiers for refer
 Each notifier must export:
 - `name`: Notifier identifier used in config
 - `notify(changes, config)`: Async function to send notifications
-
