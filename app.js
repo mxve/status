@@ -136,7 +136,11 @@ setupWatchers().catch(error => {
 
 app.get('/', async(req, res) => {
     try {
-        res.render('status', { statuses: latestStatuses });
+        const visibleStatuses = latestStatuses.filter((status, index) => {
+            const watcher = require('./config.json').watchers[index];
+            return !watcher.hidden;
+        });
+        res.render('status', { statuses: visibleStatuses });
     } catch (error) {
         res.status(500).render('error', { error });
     }
@@ -167,7 +171,10 @@ app.use((err, req, res, next) => {
 });
 
 app.get('/api/status', (req, res) => {
-    const publicData = latestStatuses.map(status => ({
+    const publicData = latestStatuses.filter((status, index) => {
+        const watcher = require('./config.json').watchers[index];
+        return !watcher.hidden;
+    }).map(status => ({
         name: status.name,
         status: status.status,
         responseTime: status.responseTime,

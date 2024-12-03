@@ -47,6 +47,7 @@ config.json structure:
             "protocol": "protocol-name",
             "checkInterval": 60,
             "url": "https://example.com",
+            "hidden": false,
             "notifications": []
         }
     ]
