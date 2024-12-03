@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Status</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Service Status</h1>
+        </header>
+
+        <div class="status-grid">
+            <% statuses.forEach(status => { %>
+                <div class="status-item" data-status="<%= status.status %>">
+                    <div class="status-header">
+                        <span class="service-name"><%= status.name %></span>
+                        <span class="status-badge status-<%= status.status %>">
+                            <%= status.status %>
+                        </span>
+                    </div>
+                    <div class="status-details">
+                        <div class="status-message">
+                            <%= status.message %>
+                        </div>
+                        <div class="meta">
+                            <% if (status.responseTime) { %>
+                                <span class="meta-item">
+                                    <%= status.responseTime %>ms
+                                </span>
+                                <% } %>
+                                    <span class="meta-item">
+                                <%= new Date(status.lastChecked).toLocaleString() %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+        </div>
+
+        <footer>
+            Auto-refreshes every 30 seconds
+        </footer>
+    </div>
+
+    <script>
+        setTimeout(() => location.reload(), 30000);
+    </script>
+</body>
+
+</html>

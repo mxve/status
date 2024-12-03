@@ -1,0 +1,201 @@
+:root {
+    --color-text: rgb(230, 225, 220);
+    --color-text-muted: rgb(180, 175, 170);
+    --color-background: rgb(18, 18, 20);
+    --color-background-light: rgb(28, 28, 30);
+    --color-background-lighter: rgb(34, 34, 36);
+    --color-background-lightest: rgb(40, 40, 42);
+    --color-button: rgb(46, 46, 48);
+    --color-button-hover: rgb(52, 52, 54);
+    --color-button-border: rgba(230, 225, 220, 0.1);
+    --color-button-border-hover: rgba(230, 225, 220, 0.2);
+    --color-green: rgb(50, 185, 100);
+    --color-orange: rgb(255, 140, 0);
+    --color-yellow: rgb(235, 235, 65);
+    --color-red: rgb(210, 60, 100);
+    --color-blue: rgb(50, 230, 230);
+    --color-purple: rgb(150, 100, 200);
+    --color-pink: rgb(255, 85, 170);
+    --color-bg-red: rgba(235, 65, 65, 0.2);
+    --color-bg-red-hover: rgba(255, 85, 85, 0.25);
+    --color-bg-yellow: rgba(235, 235, 65, 0.2);
+    --color-bg-yellow-hover: rgba(255, 255, 85, 0.25);
+    --color-bg-orange: rgba(235, 165, 65, 0.2);
+    --color-bg-orange-hover: rgba(255, 185, 85, 0.25);
+    --color-bg-green: rgba(65, 235, 65, 0.2);
+    --color-bg-green-hover: rgba(85, 255, 85, 0.25);
+    --color-bg-purple: rgba(165, 65, 235, 0.2);
+    --color-bg-purple-hover: rgba(185, 85, 255, 0.25);
+    --color-bg-pink: rgba(235, 65, 150, 0.2);
+    --color-bg-pink-hover: rgba(255, 85, 170, 0.25);
+    --color-border-red: rgba(255, 75, 75, 0.2);
+    --color-border-red-hover: rgba(255, 75, 75, 0.3);
+    --color-border-yellow: rgba(255, 255, 75, 0.2);
+    --color-border-yellow-hover: rgba(255, 255, 75, 0.3);
+    --color-border-orange: rgba(255, 175, 75, 0.2);
+    --color-border-orange-hover: rgba(255, 175, 75, 0.3);
+    --color-border-green: rgba(75, 255, 75, 0.2);
+    --color-border-green-hover: rgba(75, 255, 75, 0.3);
+    --color-border-purple: rgba(175, 75, 255, 0.2);
+    --color-border-purple-hover: rgba(175, 75, 255, 0.3);
+    --color-border-pink: rgba(255, 75, 160, 0.2);
+    --color-border-pink-hover: rgba(255, 75, 160, 0.3);
+    --color-success: var(--color-green);
+    --color-warning: var(--color-orange);
+    --color-danger: var(--color-red);
+    --color-info: var(--color-blue);
+    --color-outdated: var(--color-yellow);
+    --color-client: var(--color-purple);
+    --color-rawfiles: var(--color-red);
+    --shadow-small: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-large: 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    background: var(--color-background);
+    color: var(--color-text);
+    line-height: 1.5;
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-background-lighter);
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.status-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.status-item {
+    background: var(--color-background-light);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--color-background-lighter);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background-color 0.2s;
+}
+
+.status-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-large);
+}
+
+.status-item[data-status="down"],
+.status-item[data-status="error"] {
+    border-color: var(--color-border-red);
+    background: var(--color-background-light);
+    box-shadow: 0 0 0 1px var(--color-border-red);
+}
+
+.status-item[data-status="down"]:hover,
+.status-item[data-status="error"]:hover {
+    border-color: var(--color-border-red-hover);
+    background: var(--color-bg-red);
+    box-shadow: var(--shadow-large), 0 0 0 1px var(--color-border-red-hover);
+}
+
+.status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.service-name {
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.status-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-up {
+    background: var(--color-bg-green);
+    color: var(--color-green);
+    border: 1px solid var(--color-border-green);
+}
+
+.status-down {
+    background: var(--color-bg-red);
+    color: var(--color-red);
+    border: 1px solid var(--color-border-red);
+}
+
+.status-error {
+    background: var(--color-bg-orange);
+    color: var(--color-orange);
+    border: 1px solid var(--color-border-orange);
+}
+
+.status-unknown {
+    background: var(--color-bg-purple);
+    color: var(--color-purple);
+    border: 1px solid var(--color-border-purple);
+}
+
+.status-details {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+.status-message {
+    margin-bottom: 0.5rem;
+}
+
+.meta {
+    display: flex;
+    gap: 1rem;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+}
+
+footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-background-lighter);
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+@media (max-width: 640px) {
+    body {
+        padding: 1rem;
+    }
+    .status-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
