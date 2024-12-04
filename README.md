@@ -20,6 +20,7 @@ Simple service monitoring with a status page, configurable and extensible protoc
 - [Extending](#extending-)
   - [Custom Protocols](#custom-protocols)
   - [Custom Notifiers](#custom-notifiers)
+- [API](#api-)
 
 ## Features 🚀
 - Extensible monitoring protocols & notifications
@@ -28,7 +29,7 @@ Simple service monitoring with a status page, configurable and extensible protoc
 
 ## Configuration 🛠
 
-config.json structure:
+`config.json` structure:
 
 ```json
 {
@@ -48,6 +49,7 @@ config.json structure:
             "checkInterval": 60,
             "url": "https://example.com",
             "hidden": false,
+            "failThreshold": 3,
             "notifications": []
         }
     ]

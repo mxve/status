@@ -10,6 +10,7 @@ const scheduler = new ToadScheduler();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
 
 async function loadModules(type) {
     const modules = {};
@@ -28,35 +29,60 @@ async function loadModules(type) {
 }
 
 async function sendNotifications(newStatus, oldStatus) {
-    if (!oldStatus || oldStatus.status === newStatus.status) return;
-
     const config = require('./config.json');
+    const watcher = config.watchers.find(w => w.name === newStatus.name);
+    const index = config.watchers.findIndex(w => w.name === newStatus.name);
+    if (!watcher) return;
+
+    const threshold = watcher.failThreshold || 1;
+    let shouldNotify = false;
+    let notificationType = null;
+
+    if (newStatus.status !== 'up' &&
+        newStatus.failures === threshold &&
+        !newStatus.notified) {
+        shouldNotify = true;
+        notificationType = 'down';
+        newStatus.notified = true;
+    }
+
+    if (newStatus.status === 'up' && oldStatus?.notified) {
+        shouldNotify = true;
+        notificationType = 'up';
+        newStatus.notified = false;
+    }
+
+    if (!shouldNotify) return;
+
     const notifiers = await loadModules('notifiers');
+    const notification = {
+        ...newStatus,
+        type: notificationType
+    };
 
     if (config.globalNotifications) {
-        for (const notification of config.globalNotifications) {
-            const notifier = notifiers[notification.type];
+        for (const notifierConfig of config.globalNotifications) {
+            const notifier = notifiers[notifierConfig.type];
             if (!notifier) continue;
 
             try {
-                await notifier.notify([newStatus], notification.config);
+                await notifier.notify([notification], notifierConfig.config);
             } catch (error) {
-                console.error(`Failed to send global notification via ${notification.type}:`, error);
+                console.error(`Failed to send global notification via ${notifierConfig.type}:`, error);
             }
         }
     }
 
-    const watcher = require('./config.json').watchers.find(w => w.name === newStatus.name);
-    if (!watcher?.notifications) return;
+    if (watcher.notifications) {
+        for (const notifierConfig of watcher.notifications) {
+            const notifier = notifiers[notifierConfig.type];
+            if (!notifier) continue;
 
-    for (const notification of watcher.notifications) {
-        const notifier = notifiers[notification.type];
-        if (!notifier) continue;
-
-        try {
-            await notifier.notify([newStatus], notification.config);
-        } catch (error) {
-            console.error(`Failed to send notification via ${notification.type} for ${watcher.name}:`, error);
+            try {
+                await notifier.notify([notification], notifierConfig.config);
+            } catch (error) {
+                console.error(`Failed to send notification via ${notifierConfig.type} for ${watcher.name}:`, error);
+            }
         }
     }
 }
@@ -70,7 +96,9 @@ async function checkStatus(watcher, protocol) {
             responseTime: status.responseTime,
             lastChecked: new Date().toISOString(),
             statusCode: status.statusCode,
-            message: status.message
+            message: status.message,
+            failures: 0,
+            notified: false
         };
     } catch (error) {
         return {
@@ -78,7 +106,9 @@ async function checkStatus(watcher, protocol) {
             status: 'error',
             lastChecked: new Date().toISOString(),
             statusCode: 0,
-            message: error.message
+            message: error.message,
+            failures: 0,
+            notified: false
         };
     }
 }
@@ -91,6 +121,7 @@ async function setupWatchers() {
         latestStatuses = JSON.parse(await fs.readFile(path.join(__dirname, 'status.json'), 'utf8'));
     } catch (error) {
         console.log('No persisted status found:', error.message);
+        latestStatuses = [];
     }
 
     config.watchers.forEach((watcher, i) => {
@@ -100,7 +131,9 @@ async function setupWatchers() {
             latestStatuses[i] = {
                 name: watcher.name,
                 status: 'unknown',
-                lastChecked: new Date().toISOString()
+                lastChecked: new Date().toISOString(),
+                failures: 0,
+                notified: false
             };
         }
 
@@ -114,9 +147,19 @@ async function setupWatchers() {
                 };
 
                 const oldStatus = latestStatuses[i];
+
+                status.failures = status.status !== 'up' ?
+                    (oldStatus.failures || 0) + 1 : 0;
+
+                status.notified = oldStatus.notified;
+
                 latestStatuses[i] = status;
 
-                await fs.writeFile(path.join(__dirname, 'status.json'), JSON.stringify(latestStatuses, null, 2));
+                await fs.writeFile(
+                    path.join(__dirname, 'status.json'),
+                    JSON.stringify(latestStatuses, null, 2)
+                );
+
                 await sendNotifications(status, oldStatus);
             },
             error => console.error(`Status check failed for ${watcher.name}:`, error)
@@ -136,14 +179,34 @@ setupWatchers().catch(error => {
 
 app.get('/', async(req, res) => {
     try {
+        const config = require('./config.json');
         const visibleStatuses = latestStatuses.filter((status, index) => {
-            const watcher = require('./config.json').watchers[index];
+            const watcher = config.watchers[index];
             return !watcher.hidden;
         });
         res.render('status', { statuses: visibleStatuses });
     } catch (error) {
         res.status(500).render('error', { error });
     }
+});
+
+app.get('/api/status', (req, res) => {
+    const config = require('./config.json');
+    const publicData = latestStatuses.filter((status, index) => {
+        const watcher = config.watchers[index];
+        return !watcher.hidden;
+    }).map(status => ({
+        name: status.name,
+        status: status.status,
+        responseTime: status.responseTime,
+        lastChecked: status.lastChecked,
+        message: status.message
+    }));
+
+    res.json({
+        timestamp: new Date().toISOString(),
+        services: publicData
+    });
 });
 
 process.on('SIGINT', () => process.exit(0));
@@ -164,26 +227,8 @@ app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).render('error', {
         error: {
-            message: process.env.NODE_ENV === 'production' ?
+            message: config.server?.environment === 'production' ?
                 'Internal Server Error' : err.message
         }
-    });
-});
-
-app.get('/api/status', (req, res) => {
-    const publicData = latestStatuses.filter((status, index) => {
-        const watcher = require('./config.json').watchers[index];
-        return !watcher.hidden;
-    }).map(status => ({
-        name: status.name,
-        status: status.status,
-        responseTime: status.responseTime,
-        lastChecked: status.lastChecked,
-        message: status.message
-    }));
-
-    res.json({
-        timestamp: new Date().toISOString(),
-        services: publicData
     });
 });
